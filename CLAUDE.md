@@ -1,5 +1,11 @@
 # Docker Typesense - Documentação Claude
 
+## Instruções para Claude Code
+
+**IMPORTANTE**: Ao criar commits neste repositório, NÃO incluir atribuições de co-autoria ao Claude Code ou emojis. Commits devem ser simples e diretos, sem linhas como:
+- `🤖 Generated with [Claude Code](https://claude.com/claude-code)`
+- `Co-Authored-By: Claude <noreply@anthropic.com>`
+
 ## Visão Geral
 
 Este diretório contém a infraestrutura completa para executar um servidor **Typesense** containerizado via Docker, pré-configurado para indexar e disponibilizar o dataset **govbrnews** do HuggingFace para buscas ultrarrápidas em texto completo.
