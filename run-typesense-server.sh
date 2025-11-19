@@ -79,9 +79,9 @@ show_help() {
     echo ""
 }
 
-# Function to cleanup existing container (reuses image for faster startup)
+# Function to cleanup existing container and volume (reuses image for faster startup)
 cleanup_existing() {
-    log_step "Cleaning up existing container"
+    log_step "Cleaning up existing container and volume"
 
     # Stop and remove existing container if it exists
     if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
@@ -92,6 +92,15 @@ cleanup_existing() {
         log_success "Existing container removed"
     else
         log_info "No existing container found"
+    fi
+
+    # Remove persistent volume if it exists
+    if docker volume ls --format '{{.Name}}' | grep -q "^${VOLUME_NAME}$"; then
+        log_info "Removing persistent volume: ${VOLUME_NAME}"
+        docker volume rm ${VOLUME_NAME} >/dev/null 2>&1 || true
+        log_success "Existing volume removed"
+    else
+        log_info "No existing volume found"
     fi
 
     # Check if image exists (will be reused or built if needed)
