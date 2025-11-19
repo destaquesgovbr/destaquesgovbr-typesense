@@ -168,8 +168,9 @@ def download_and_process_dataset():
         df['published_month'] = df['published_at'].dt.month
 
         # Convert datetime to Unix timestamp (seconds) for Typesense
-        df['published_at_ts'] = df['published_at'].astype('int64') // 10**9
-        df['extracted_at_ts'] = df['extracted_at'].astype('int64') // 10**9
+        # Use .timestamp() to handle timezone-aware datetimes and any precision (ns, us, ms)
+        df['published_at_ts'] = df['published_at'].apply(lambda x: int(x.timestamp()) if pd.notna(x) else 0)
+        df['extracted_at_ts'] = df['extracted_at'].apply(lambda x: int(x.timestamp()) if pd.notna(x) else 0)
 
         # Calculate ISO 8601 week (YYYYWW format) for temporal analysis
         logger.info("Calculating ISO 8601 weeks for temporal optimization...")
