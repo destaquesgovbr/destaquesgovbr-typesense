@@ -158,6 +158,8 @@ def download_and_process_dataset():
         df = dataset.to_pandas()
 
         # Convert published_at and extracted_at to datetime
+        # Note: published_at can be either date-only or datetime with timezone
+        # Both formats are automatically handled by pd.to_datetime()
         df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
         df['extracted_at'] = pd.to_datetime(df['extracted_at'], errors='coerce')
 
