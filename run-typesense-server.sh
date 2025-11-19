@@ -79,9 +79,9 @@ show_help() {
     echo ""
 }
 
-# Function to cleanup existing container and image
+# Function to cleanup existing container (reuses image for faster startup)
 cleanup_existing() {
-    log_step "Cleaning up existing container and image"
+    log_step "Cleaning up existing container"
 
     # Stop and remove existing container if it exists
     if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
@@ -94,13 +94,11 @@ cleanup_existing() {
         log_info "No existing container found"
     fi
 
-    # Remove existing image if it exists
+    # Check if image exists (will be reused or built if needed)
     if docker images --format '{{.Repository}}' | grep -q "^${IMAGE_NAME}$"; then
-        log_info "Removing existing image: ${IMAGE_NAME}"
-        docker rmi ${IMAGE_NAME} >/dev/null 2>&1 || true
-        log_success "Existing image removed"
+        log_info "Reusing existing image: ${IMAGE_NAME}"
     else
-        log_info "No existing image found"
+        log_info "No existing image found, will build new image"
     fi
 }
 
