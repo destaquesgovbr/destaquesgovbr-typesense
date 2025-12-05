@@ -94,6 +94,8 @@ def create_collection(client):
                 {'name': 'category', 'type': 'string', 'facet': True, 'optional': True},
                 {'name': 'content', 'type': 'string', 'facet': False, 'optional': True},
                 {'name': 'summary', 'type': 'string', 'facet': False, 'optional': True},
+                {'name': 'subtitle', 'type': 'string', 'facet': False, 'optional': True},
+                {'name': 'editorial_lead', 'type': 'string', 'facet': False, 'optional': True},
                 {'name': 'extracted_at', 'type': 'int64', 'facet': False, 'optional': True},
                 {'name': 'theme_1_level_1_code', 'type': 'string', 'facet': True, 'optional': True},
                 {'name': 'theme_1_level_1_label', 'type': 'string', 'facet': True, 'optional': True},
@@ -234,6 +236,16 @@ def prepare_document(row: pd.Series) -> Dict[str, Any]:
         val = str(row['summary']).strip()
         if val:
             doc['summary'] = val
+
+    if pd.notna(row.get('subtitle')):
+        val = str(row['subtitle']).strip()
+        if val:
+            doc['subtitle'] = val
+
+    if pd.notna(row.get('editorial_lead')):
+        val = str(row['editorial_lead']).strip()
+        if val:
+            doc['editorial_lead'] = val
 
     if pd.notna(row.get('extracted_at_ts')) and row['extracted_at_ts'] > 0:
         doc['extracted_at'] = int(row['extracted_at_ts'])
