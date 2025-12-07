@@ -14,20 +14,27 @@ RUN apt-get update && apt-get install -y \
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# Create app directory
+WORKDIR /app
 
-# Copy initialization scripts
-COPY init-typesense.py /opt/init-typesense.py
+# Copy package files and install
+COPY pyproject.toml /app/
+COPY src/ /app/src/
+COPY scripts/ /app/scripts/
+COPY requirements.txt /app/
+
+# Install dependencies and the package
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -e .
+
+# Copy entrypoint script
 COPY entrypoint.sh /opt/entrypoint.sh
-
-# Make scripts executable
 RUN chmod +x /opt/entrypoint.sh
 
 # Set environment variables for Typesense
 ENV TYPESENSE_API_KEY=govbrnews_api_key_change_in_production
 ENV TYPESENSE_DATA_DIR=/data
+ENV PYTHONPATH=/app/src
 
 # Create data directory
 RUN mkdir -p /data
