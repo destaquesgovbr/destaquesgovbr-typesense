@@ -1,0 +1,89 @@
+name: Typesense Daily Incremental Load
+
+on:
+  # Run daily at 10:00 AM UTC (7:00 AM Brazil time)
+  schedule:
+    - cron: '0 10 * * *'
+
+  # Allow manual triggering with custom days parameter
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Number of days to look back for incremental load'
+        required: false
+        default: '7'
+        type: number
+
+env:
+  PROJECT_ID: inspire-7-finep
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  incremental-load:
+    name: Load Last Week Data to Typesense
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Run incremental data load
+        env:
+          TYPESENSE_HOST: ${{ secrets.TYPESENSE_HOST }}
+          TYPESENSE_PORT: '8108'
+          TYPESENSE_API_KEY: ${{ secrets.TYPESENSE_API_KEY }}
+        run: |
+          DAYS=${{ github.event.inputs.days || '7' }}
+          echo "Loading data from last $DAYS days..."
+          python scripts/load_data.py --mode incremental --days "$DAYS"
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Incremental load completed successfully"
+          else
+            echo "❌ Incremental load failed"
+            exit 1
+          fi
+
+      - name: Trigger portal cache refresh
+        if: success()
+        run: |
+          echo "Triggering portal deployment to refresh cache..."
+          gcloud run services update destaquesgovbr-portal \
+            --region southamerica-east1 \
+            --update-env-vars "CACHE_BUST=$(date +%s)" \
+            --quiet

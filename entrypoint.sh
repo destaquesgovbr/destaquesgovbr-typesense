@@ -42,9 +42,9 @@ else
     # Activate the virtual environment
     source /opt/venv/bin/activate
 
-    # Run Python initialization script
+    # Run the load_data script using the new module
     echo "Running Typesense database initialization script..."
-    python3 /opt/init-typesense.py
+    cd /app && python scripts/load_data.py --mode full
 
     echo "Initialization completed!"
 fi
