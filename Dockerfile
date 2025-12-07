@@ -32,7 +32,7 @@ COPY entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
 
 # Set environment variables for Typesense
-ENV TYPESENSE_API_KEY=govbrnews_api_key_change_in_production
+# Note: TYPESENSE_API_KEY is not set here - entrypoint fetches from Secret Manager in GCP
 ENV TYPESENSE_DATA_DIR=/data
 ENV PYTHONPATH=/app/src
 

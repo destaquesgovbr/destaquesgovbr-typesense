@@ -4,7 +4,7 @@ set -e
 echo "Starting GovBR News Typesense server..."
 
 # Fetch API key from Secret Manager if not properly set
-if [ -z "$TYPESENSE_API_KEY" ] || [ "$TYPESENSE_API_KEY" = '${TYPESENSE_API_KEY}' ]; then
+if [ -z "$TYPESENSE_API_KEY" ] || [ "$TYPESENSE_API_KEY" = '${TYPESENSE_API_KEY}' ] || [ "$TYPESENSE_API_KEY" = 'govbrnews_api_key_change_in_production' ]; then
     echo "Fetching API key from Secret Manager..."
 
     # Get access token from metadata service
