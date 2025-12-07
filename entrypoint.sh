@@ -24,6 +24,8 @@ if [ -z "$TYPESENSE_API_KEY" ] || [ "$TYPESENSE_API_KEY" = '${TYPESENSE_API_KEY}
         exit 1
     fi
     echo "API key fetched successfully"
+    # Export for subprocesses (Python scripts)
+    export TYPESENSE_API_KEY
 fi
 
 # Start Typesense server in the background
