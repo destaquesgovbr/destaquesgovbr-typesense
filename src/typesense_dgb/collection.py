@@ -89,6 +89,12 @@ COLLECTION_SCHEMA: dict[str, Any] = {
             "optional": True,
             "index": True,
         },
+        {
+            "name": "tags",
+            "type": "string[]",
+            "facet": True,
+            "optional": True,
+        },
     ],
     "default_sorting_field": "published_at",
 }
