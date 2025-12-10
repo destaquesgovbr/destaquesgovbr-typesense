@@ -12,6 +12,44 @@ from typesense_dgb.collection import COLLECTION_NAME
 
 logger = logging.getLogger(__name__)
 
+# Limite máximo de caracteres para uma tag válida
+MAX_TAG_LENGTH = 100
+
+
+def clean_tags(tags_value) -> list[str]:
+    """
+    Limpa e normaliza o campo tags.
+
+    Args:
+        tags_value: Valor do campo tags (pode ser numpy.ndarray, list ou None)
+
+    Returns:
+        Lista de tags limpas e válidas
+    """
+    # Converter numpy.ndarray para list
+    if hasattr(tags_value, "tolist"):
+        tags = tags_value.tolist()
+    elif isinstance(tags_value, list):
+        tags = tags_value
+    else:
+        return []
+
+    # Filtrar e limpar
+    cleaned = []
+    for tag in tags:
+        if not isinstance(tag, str):
+            continue
+        tag = tag.strip()
+        # Ignorar tags vazias
+        if not tag:
+            continue
+        # Ignorar tags muito longas (provavelmente são textos, não tags)
+        if len(tag) > MAX_TAG_LENGTH:
+            continue
+        cleaned.append(tag)
+
+    return cleaned
+
 
 def prepare_document(row: pd.Series) -> dict[str, Any]:
     """
@@ -78,6 +116,12 @@ def prepare_document(row: pd.Series) -> dict[str, Any]:
 
     if pd.notna(row.get("published_week")) and row["published_week"] > 0:
         doc["published_week"] = int(row["published_week"])
+
+    # Campo tags (array de strings)
+    if "tags" in row and row["tags"] is not None:
+        cleaned_tags = clean_tags(row["tags"])
+        if cleaned_tags:  # Só adiciona se houver tags válidas
+            doc["tags"] = cleaned_tags
 
     return doc
 
